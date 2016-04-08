@@ -11,3 +11,4 @@ from chef.role import Role
 from chef.environment import Environment
 from chef.search import Search
 from chef.partial_search import PartialSearch
+from chef.acl import Acl
