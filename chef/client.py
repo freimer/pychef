@@ -42,10 +42,11 @@ class Client(ChefObject):
         return d
 
     @classmethod
-    def create(cls, name, api=None, admin=False):
+    def create(cls, name, api=None, admin=False, create_key=True):
         api = api or ChefAPI.get_global()
         obj = cls(name, api, skip_load=True)
         obj.admin = admin
+        obj.create_key = create_key
         d = api.api_request('POST', cls.url, data=obj)
         obj.private_key = d['private_key']
         obj.public_key = d['public_key']
