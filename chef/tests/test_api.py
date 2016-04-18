@@ -27,10 +27,6 @@ class APITestCase(unittest2.TestCase):
         finally:
             del os.environ['_PYCHEF_TEST_']
 
-    def test_encryption(self):
-        api = self.load('encryption.rb')
-        self.assertEqual(api.encryption_version, '2')
-
     def test_bad_key_raises(self):
         invalids = [None, '']
         for item in invalids:

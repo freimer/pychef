@@ -56,7 +56,7 @@ class ChefAPI(object):
     env_value_re = re.compile(r'ENV\[(.+)\]')
     ruby_string_re = re.compile(r'^\s*(["\'])(.*?)\1\s*$')
 
-    def __init__(self, url, key, client, version='0.10.8', headers={}, secret_file=None, encryption_version=1):
+    def __init__(self, url, key, client, version='0.10.8', headers={}, ssl_verify=True):
         self.url = url.rstrip('/')
         self.parsed_url = six.moves.urllib.parse.urlparse(self.url)
         if not isinstance(key, Key):
@@ -66,19 +66,12 @@ class ChefAPI(object):
         self.key = key
         self.client = client
         self.version = version
-        self.encryption_version = encryption_version
         self.headers = dict((k.lower(), v) for k, v in six.iteritems(headers))
         self.version_parsed = pkg_resources.parse_version(self.version)
         self.platform = self.parsed_url.hostname == 'api.opscode.com'
         self.ssl_verify = ssl_verify
         if not api_stack_value():
             self.set_default()
-        self.encryption_key = None
-        if secret_file is not None:
-            self.secret_file = secret_file
-            if os.path.exists(self.secret_file):
-                self.encryption_key = open(self.secret_file).read().strip()
-
 
     @classmethod
     def from_config_file(cls, path):
@@ -90,7 +83,7 @@ class ChefAPI(object):
             # Can't even read the config file
             log.debug('Unable to read config file "%s"', path)
             return
-        url = key_path = client_name = encryption_version = None
+        url = key_path = client_name = None
         ssl_verify = True
         for line in open(path):
             if not line.strip() or line.startswith('#'):
@@ -130,9 +123,6 @@ class ChefAPI(object):
             elif key == 'node_name':
                 log.debug('Found client name: %r', value)
                 client_name = value
-            elif key == 'data_bag_encrypt_version':
-                log.debug('Found data bag encryption version: %r', value)
-                encryption_version = value
             elif key == 'client_key':
                 log.debug('Found key path: %r', value)
                 key_path = value
@@ -168,9 +158,7 @@ class ChefAPI(object):
             return
         if not client_name:
             client_name = socket.getfqdn()
-        if not encryption_version:
-            encryption_version = 1
-        return cls(url, key_path, client_name, encryption_version=encryption_version)
+        return cls(url, key_path, client_name, ssl_verify=ssl_verify)
 
     @staticmethod
     def get_global():

@@ -31,14 +31,6 @@ class ChefServerNotFoundError(ChefServerError):
 class ChefAPIVersionError(ChefError):
     """An incompatible API version error"""
 
-class ChefUnsupportedEncryptionVersionError(ChefError):
-    def __init__(self, version):
-        message = "This version of chef does not support encrypted data bag item format version %s" % version
-        return super(ChefError, self).__init__(message)
-
-class ChefDecryptionError(ChefError):
-    """Error decrypting data bag value. Most likely the provided key is incorrect"""
-
 
 class ChefObjectTypeError(ChefError):
     """An invalid object type error"""
